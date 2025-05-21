@@ -7,8 +7,8 @@ import (
 )
 
 type CreateFollowCommand struct {
-	FollowerID string
-	FollowedID string
+	FollowerID string `json:"-"`
+	FollowedID string `json:"followed_id"`
 }
 
 type CreateFollow struct {
@@ -39,5 +39,8 @@ func (c *CreateFollow) Exec(ctx context.Context, cmd *CreateFollowCommand) (*Cre
 		return nil, err
 	}
 
-	return &CreateFollowResponse{}, nil
+	return &CreateFollowResponse{
+		FollowerID: follow.FollowerID,
+		FollowedID: follow.FollowedID,
+	}, nil
 }

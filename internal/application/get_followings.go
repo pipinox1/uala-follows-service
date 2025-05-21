@@ -10,7 +10,7 @@ type GetFollowingsCommand struct {
 }
 
 type GetFollowingsResponse struct {
-	Following []string
+	Followings []string `json:"followings"`
 }
 
 type GetFollowings struct {
@@ -24,11 +24,11 @@ func NewGetFollowings(followRepository domain.FollowRepository) *GetFollowings {
 }
 
 func (g *GetFollowings) Exec(ctx context.Context, cmd *GetFollowingsCommand) (*GetFollowingsResponse, error) {
-	following, err := g.followRepository.FindFollowing(ctx, cmd.UserID)
+	followings, err := g.followRepository.FindFollowing(ctx, cmd.UserID)
 	if err != nil {
 		return nil, err
 	}
 	return &GetFollowingsResponse{
-		Following: following,
+		Followings: followings,
 	}, nil
 }

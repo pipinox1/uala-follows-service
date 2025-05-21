@@ -22,9 +22,8 @@ func NewFollowRepository(db *sqlx.DB) *FollowRepository {
 
 func (f FollowRepository) FindFollowers(ctx context.Context, userID string) ([]string, error) {
 	query := `
-       SELECT u.id
-       FROM users u
-       JOIN follows f ON f.follower_id = u.id
+       SELECT f.follower_id
+       FROM follows f
        WHERE f.followed_id = $1`
 
 	var followers []string
@@ -42,15 +41,17 @@ func (f FollowRepository) FindFollowers(ctx context.Context, userID string) ([]s
 
 func (f FollowRepository) FindFollowing(ctx context.Context, userID string) ([]string, error) {
 	query := `
-       SELECT u.id
-       FROM users u
-       JOIN follows f ON f.followed_id = u.id
+       SELECT f.followed_id
+       FROM follows f
        WHERE f.follower_id = $1`
 
 	var following []string
 	err := f.db.SelectContext(ctx, &following, query, userID)
 	if err != nil {
-		return nil, fmt.Errorf("error finding following: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.ErrFollowNotFound
+		}
+		return nil, domain.ErrFollowInternalError
 	}
 
 	if len(following) == 0 {
@@ -72,124 +73,6 @@ func (f FollowRepository) Create(ctx context.Context, follow *domain.Follow) err
 	}
 
 	return nil
-}
-
-func (f FollowRepository) Delete(ctx context.Context, followerID, followedID string) error {
-	query := `
-       DELETE FROM follows
-       WHERE follower_id = $1 AND followed_id = $2`
-
-	result, err := f.db.ExecContext(ctx, query, followerID, followedID)
-	if err != nil {
-		return fmt.Errorf("error deleting follow relationship: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("error getting rows affected: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return sql.ErrNoRows
-	}
-
-	return nil
-}
-
-func (f FollowRepository) FindFollow(ctx context.Context, followerID, followedID string) (*domain.Follow, error) {
-	query := `
-       SELECT follower_id, followed_id, created_at
-       FROM follows
-       WHERE follower_id = $1 AND followed_id = $2`
-
-	var followDB followDB
-	err := f.db.GetContext(ctx, &followDB, query, followerID, followedID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("error finding follow relationship: %w", err)
-	}
-
-	return followDB.toDomain(), nil
-}
-
-// CountFollowers cuenta el número de seguidores de un usuario
-func (f FollowRepository) CountFollowers(ctx context.Context, userID string) (int, error) {
-	query := `
-       SELECT COUNT(*)
-       FROM follows
-       WHERE followed_id = $1`
-
-	var count int
-	err := f.db.GetContext(ctx, &count, query, userID)
-	if err != nil {
-		return 0, fmt.Errorf("error counting followers: %w", err)
-	}
-
-	return count, nil
-}
-
-// CountFollowing cuenta el número de usuarios que sigue un usuario
-func (f FollowRepository) CountFollowing(ctx context.Context, userID string) (int, error) {
-	query := `
-       SELECT COUNT(*)
-       FROM follows
-       WHERE follower_id = $1`
-
-	var count int
-	err := f.db.GetContext(ctx, &count, query, userID)
-	if err != nil {
-		return 0, fmt.Errorf("error counting following: %w", err)
-	}
-
-	return count, nil
-}
-
-// FindFollowersWithPagination busca seguidores de un usuario con paginación
-func (f FollowRepository) FindFollowersWithPagination(ctx context.Context, userID string, limit, offset int) ([]string, error) {
-	query := `
-       SELECT u.id
-       FROM users u
-       JOIN follows f ON f.follower_id = u.id
-       WHERE f.followed_id = $1
-       ORDER BY f.created_at DESC
-       LIMIT $2 OFFSET $3`
-
-	var followers []string
-	err := f.db.SelectContext(ctx, &followers, query, userID, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("error finding followers with pagination: %w", err)
-	}
-
-	if len(followers) == 0 {
-		return []string{}, nil
-	}
-
-	return followers, nil
-}
-
-// FindFollowingWithPagination busca usuarios seguidos por un usuario con paginación
-func (f FollowRepository) FindFollowingWithPagination(ctx context.Context, userID string, limit, offset int) ([]string, error) {
-	query := `
-       SELECT u.id
-       FROM users u
-       JOIN follows f ON f.followed_id = u.id
-       WHERE f.follower_id = $1
-       ORDER BY f.created_at DESC
-       LIMIT $2 OFFSET $3`
-
-	var following []string
-	err := f.db.SelectContext(ctx, &following, query, userID, limit, offset)
-	if err != nil {
-		return nil, fmt.Errorf("error finding following with pagination: %w", err)
-	}
-
-	if len(following) == 0 {
-		return []string{}, nil
-	}
-
-	return following, nil
 }
 
 type followDB struct {

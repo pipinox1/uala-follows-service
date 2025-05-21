@@ -10,7 +10,7 @@ type GetFollowersCommand struct {
 }
 
 type GetFollowersResponse struct {
-	Followers []string
+	Followers []string `json:"followers"`
 }
 
 type GetFollowers struct {

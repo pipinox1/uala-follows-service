@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"uala-followers-service/config"
 	"uala-followers-service/internal/application"
@@ -16,6 +17,8 @@ func createFollow(deps *config.Dependencies) http.HandlerFunc {
 			handleError(w, err)
 			return
 		}
+		followerId := chi.URLParam(r, "user_id")
+		cmd.FollowerID = followerId
 		response, err := createFollow.Exec(r.Context(), &cmd)
 		if err != nil {
 			handleError(w, err)
@@ -34,11 +37,8 @@ func getFollowers(deps *config.Dependencies) http.HandlerFunc {
 	getFollowers := application.NewGetFollowers(deps.FollowRepository)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cmd application.GetFollowersCommand
-		err := json.NewDecoder(r.Body).Decode(&cmd)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
+		userID := chi.URLParam(r, "user_id")
+		cmd.UserID = userID
 		response, err := getFollowers.Exec(r.Context(), &cmd)
 		if err != nil {
 			handleError(w, err)
@@ -57,11 +57,8 @@ func getFollowings(deps *config.Dependencies) http.HandlerFunc {
 	createFollow := application.NewGetFollowings(deps.FollowRepository)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cmd application.GetFollowingsCommand
-		err := json.NewDecoder(r.Body).Decode(&cmd)
-		if err != nil {
-			handleError(w, err)
-			return
-		}
+		userID := chi.URLParam(r, "user_id")
+		cmd.UserID = userID
 		response, err := createFollow.Exec(r.Context(), &cmd)
 		if err != nil {
 			handleError(w, err)
