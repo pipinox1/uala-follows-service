@@ -9,5 +9,5 @@
     "database": "followers",
     "ssl": false
   },
-  "port": 8082
+  "port": 8080
 }
