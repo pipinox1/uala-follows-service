@@ -71,3 +71,27 @@ In the `uala-posts-service` repository, you'll find the `docker-compose` file us
 - posts-service: 8080
 - timeline-service: 8081
 - followers-service: 8082
+
+## Usage/Examples
+
+### Create Follower for user 1312
+
+```bash
+curl --location 'localhost:8082/api/v1/follow/user/1312/follow' \
+--header 'Content-Type: application/json' \
+--data '{
+    "followed_id": "123abc"
+}'
+```
+
+### Get Follower of user 1312
+
+```bash
+curl --location 'localhost:8082/api/v1/follow/user/1312/followers'
+```
+
+### Create Followings for user 1312
+
+```bash
+curl --location 'localhost:8082/api/v1/follow/user/1312/followings'
+```
