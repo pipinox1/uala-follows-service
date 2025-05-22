@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 	"time"
 	"uala-followers-service/internal/domain"
 )
@@ -29,6 +30,10 @@ func (f FollowRepository) FindFollowers(ctx context.Context, userID string) ([]s
 	var followers []string
 	err := f.db.SelectContext(ctx, &followers, query, userID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []string{}, nil
+		}
+		log.Err(err).Msg("error getting followers")
 		return nil, fmt.Errorf("error finding followers: %w", err)
 	}
 
@@ -51,6 +56,7 @@ func (f FollowRepository) FindFollowing(ctx context.Context, userID string) ([]s
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrFollowNotFound
 		}
+		log.Err(err).Msg("error getting followings")
 		return nil, domain.ErrFollowInternalError
 	}
 
@@ -69,6 +75,7 @@ func (f FollowRepository) Create(ctx context.Context, follow *domain.Follow) err
 	followDB := toDB(follow)
 	_, err := f.db.NamedExecContext(ctx, query, followDB)
 	if err != nil {
+		log.Err(err).Msg("error creating follow")
 		return fmt.Errorf("error creating follow relationship: %w", err)
 	}
 
