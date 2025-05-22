@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"uala-followers-service/internal/domain"
-	"uala-followers-service/libs/events"
 )
 
 type CreateFollowCommand struct {
@@ -13,7 +12,6 @@ type CreateFollowCommand struct {
 
 type CreateFollow struct {
 	followRepository domain.FollowRepository
-	eventPublisher   events.Publisher
 }
 
 type CreateFollowResponse struct {
@@ -21,10 +19,9 @@ type CreateFollowResponse struct {
 	FollowedID string `json:"followed_id"`
 }
 
-func NewCreateFollow(followRepository domain.FollowRepository, publisher events.Publisher) *CreateFollow {
+func NewCreateFollow(followRepository domain.FollowRepository) *CreateFollow {
 	return &CreateFollow{
 		followRepository: followRepository,
-		eventPublisher:   publisher,
 	}
 }
 

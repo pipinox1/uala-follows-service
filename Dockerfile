@@ -1,22 +1,17 @@
-FROM golang:alpine AS build
+FROM golang:1.23-alpine AS build
+RUN apk update && apk add git
+RUN mkdir /go/src/app
+ADD . /go/src/app
 WORKDIR /go/src/app
-RUN apk add --update --no-cache gcc musl-dev vips-dev
 
-COPY . .
-COPY ./libs ./libs
-
-WORKDIR /go/src/app/core
 RUN go mod tidy
-RUN go mod vendor
-RUN go build -o /go/src/app/core main.go
+RUN go build -o /go/src/app/main cmd/app/main.go
 
-# Final image
-FROM alpine:latest
-RUN apk add --update --no-cache vips
+FROM alpine
 
-COPY --from=build /go/src/app/core/main /go/src/app/
-ADD https://github.com/golang/go/raw/master/lib/time/zoneinfo.zip /zoneinfo.zip
+COPY --from=build /go/src/app/main /go/src/app/
+COPY --from=build /go/src/app/config /go/src/app/config
+RUN ls -la /go/src/app/config
 
-EXPOSE 8081
-
+EXPOSE 8080
 ENTRYPOINT ["/go/src/app/main"]

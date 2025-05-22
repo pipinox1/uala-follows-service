@@ -9,7 +9,7 @@ import (
 )
 
 func createFollow(deps *config.Dependencies) http.HandlerFunc {
-	createFollow := application.NewCreateFollow(deps.FollowRepository, deps.EventPublisher)
+	createFollow := application.NewCreateFollow(deps.FollowRepository)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cmd application.CreateFollowCommand
 		err := json.NewDecoder(r.Body).Decode(&cmd)

@@ -1,5 +1,5 @@
 {
-  "env": "dev",
+  "env": "local",
   "service-name": "posts-service",
   "postgres": {
     "port": 5432,

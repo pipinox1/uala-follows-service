@@ -3,24 +3,25 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"os"
 	"path/filepath"
 	"runtime"
 )
 
 type Config struct {
-	ServiceName string   `json:" "`
-	Env         string   `json:"env"`
-	Port        string   `json:"port"`
-	Postgres    Postgres `json:"postgres"`
+	ServiceName string   `mapstructure:"service_name"`
+	Env         string   `mapstructure:"env"`
+	Port        string   `mapstructure:"port"`
+	Postgres    Postgres `mapstructure:"postgres"`
 }
 
 type Postgres struct {
-	Host     string `json:"postgres_host"`
-	Port     string `json:"port"`
-	Password string `json:"password"`
-	Database string `json:"database"`
-	User     string `json:"user"`
-	UseSSL   bool   `json:"use_ssl"`
+	Host     string `mapstructure:"host"`
+	Port     string `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	Database string `mapstructure:"database"`
+	User     string `mapstructure:"user"`
+	UseSSL   bool   `mapstructure:"use_ssl"`
 }
 
 func ReadConfig() (*Config, error) {
@@ -30,7 +31,7 @@ func ReadConfig() (*Config, error) {
 	}
 
 	configDir := filepath.Join(filepath.Dir(filename))
-	viper.SetConfigName("local")
+	viper.SetConfigName(getConfigName())
 	viper.SetConfigType("json")
 	viper.AddConfigPath(configDir)
 
@@ -46,4 +47,12 @@ func ReadConfig() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func getConfigName() string {
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		return "local"
+	}
+	return env
 }

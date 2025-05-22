@@ -1,0 +1,13 @@
+{
+  "env": "dev",
+  "service-name": "followers-service",
+  "postgres": {
+    "port": 5432,
+    "user": "eduardopena",
+    "password": "password",
+    "host": "postgres",
+    "database": "followers",
+    "ssl": false
+  },
+  "port": 8080
+}

@@ -6,12 +6,10 @@ import (
 	_ "github.com/lib/pq"
 	"uala-followers-service/internal/domain"
 	"uala-followers-service/internal/infrastructure"
-	"uala-followers-service/libs/events"
 )
 
 type Dependencies struct {
 	FollowRepository domain.FollowRepository
-	EventPublisher   events.Publisher
 }
 
 func BuildDependencies(config Config) (*Dependencies, error) {
@@ -36,9 +34,7 @@ func BuildDependencies(config Config) (*Dependencies, error) {
 	}
 
 	followRepository := infrastructure.NewFollowRepository(db)
-	eventPublisher := events.NewInmemEvents()
 	return &Dependencies{
 		FollowRepository: followRepository,
-		EventPublisher:   eventPublisher,
 	}, nil
 }
