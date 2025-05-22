@@ -7,7 +7,7 @@ Manage follows relation between users
 
 #### Follow user
 
-```http
+```
   POST /api/v1/follow/user/${user_id}/follow
 ```
 
@@ -24,7 +24,7 @@ Manage follows relation between users
 
 #### Get user followings
 
-```http
+```
   GET /api/v1/follow/user/${user_id}/followings
 ```
 
@@ -34,7 +34,7 @@ Manage follows relation between users
 
 #### Get user followers
 
-```http
+```
   GET /api/v1/follow/user/${user_id}/followers
 ```
 
